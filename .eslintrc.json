@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "@bjerk/eslint-config",
+    "next/core-web-vitals"
+  ],
+  "overrides": [
+    {
+      "files": ["src/app/**/*.ts", "src/app/**/*.tsx"],
+      "rules": {
+        "import/no-default-export": "off",
+        "import/no-unassigned-import": "off"
+      }
+    }
+  ]
+}
