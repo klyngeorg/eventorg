@@ -35,7 +35,7 @@ jobs:
             needs-refinement
             needs-triage
         env:
-          GITHUB_TOKEN: ${{ secrets.BJERKBOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
 
   build-container:
     name: Build container
@@ -80,9 +80,8 @@ jobs:
         uses: google-github-actions/auth@v1
         with:
           token_format: access_token
-          project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+          service_account: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
 
       - name: Authenticate with Docker 🔑
         uses: docker/login-action@v2
@@ -118,7 +117,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./
-          file: ${{ matrix.app.container-file }}
           push: true
           tags: |
             ${{ steps.meta-ghcr.outputs.tags }}
