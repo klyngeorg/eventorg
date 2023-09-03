@@ -113,7 +113,6 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build and Push Container 🛠
-        id: build-and-push
         uses: docker/build-push-action@v4
         with:
           context: ./
@@ -129,4 +128,5 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: klyngeorg-eventorg
-          image: ${{ env.GHCR_IMAGE }}
+          region: europe-north1
+          image: ${{ env.GHCR_IMAGE }}:${{ steps.meta-ghcr.outputs.version }}
