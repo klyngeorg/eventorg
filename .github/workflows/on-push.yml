@@ -124,6 +124,12 @@ jobs:
           cache-from: type=gha,mode=max
           cache-to: type=gha,mode=max
 
+      - name: Authenticate with Google 🔑
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+
       - id: deploy
         uses: google-github-actions/deploy-cloudrun@v1
         with:
