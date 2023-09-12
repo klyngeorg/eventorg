@@ -135,4 +135,4 @@ jobs:
         with:
           service: klyngeorg-eventorg
           region: europe-north1
-          image: ${{ env.GHCR_IMAGE }}:${{ steps.meta-ghcr.outputs.version }}
+          image: ${{ env.GAR_IMAGE }}:${{ steps.meta-ghcr.outputs.version }}
