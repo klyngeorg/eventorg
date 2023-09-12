@@ -1,0 +1,88 @@
+import { z } from 'zod';
+import { pbkdf2, randomUUID } from 'node:crypto';
+import type { Firestore } from '@google-cloud/firestore';
+import type { Cookies } from '@sveltejs/kit';
+import { sign, unsign } from './signer';
+
+const sessionType = z.object({
+  userId: z.string(),
+  expiresAt: z.date()
+});
+
+type Session = z.infer<typeof sessionType> & { id: string };
+type CreateSession = z.infer<typeof sessionType>;
+
+export async function getSession(firestore: Firestore, sessionId: string): Promise<null | Session> {
+  const sessionDoc = await firestore.collection('sessions').doc(sessionId).get();
+  if (!sessionDoc.exists) {
+    return null;
+  }
+
+  const session = sessionType.parse(sessionDoc.data());
+
+  return {
+    id: sessionDoc.id,
+    ...session
+  };
+}
+
+async function generateSessionId(authSignSecret: string): Promise<string> {
+  const iteration = 500;
+  const keylength = 24;
+  const digest = 'sha1';
+  return new Promise<string>((resolve, reject) =>
+    pbkdf2(randomUUID(), authSignSecret, iteration, keylength, digest, (err, key) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(key.toString('hex'));
+    })
+  );
+}
+
+export async function createSession(
+  firestore: Firestore,
+  userId: string,
+  authSignSecret: string
+): Promise<Session> {
+  const sessionId = await generateSessionId(authSignSecret);
+  const session = {
+    userId,
+    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+  } satisfies CreateSession;
+  await firestore.collection('sessions').doc(sessionId).set(session);
+  return {
+    id: sessionId,
+    ...session
+  };
+}
+
+export async function readSessionIdFromCookies(cookies: Cookies, authSignSecret: string) {
+  const encryptedSessionId = cookies.get('eventorg-session-id');
+  if (!encryptedSessionId) {
+    return null;
+  }
+
+  const result = unsign(encryptedSessionId, authSignSecret);
+
+  if (!result.valid) {
+    return null;
+  }
+
+  return result.value;
+}
+export async function writeSessionToCookies(
+  cookies: Cookies,
+  sessionId: string,
+  authSignSecret: string,
+  domain?: string
+) {
+  const encryptedSessionId = sign(sessionId, authSignSecret);
+  cookies.set('eventorg-session-id', encryptedSessionId, {
+    domain,
+    path: '/',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict'
+  });
+}
