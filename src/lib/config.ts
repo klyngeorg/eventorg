@@ -22,7 +22,7 @@ function setupEnv() {
 
 export type Config = ReturnType<typeof setupEnv>;
 
-export function makeConfig(): Config {
+export function createConfig(): Config {
   if (building) {
     return {} as unknown as Config;
   }

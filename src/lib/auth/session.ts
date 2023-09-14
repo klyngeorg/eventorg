@@ -12,7 +12,10 @@ const sessionType = z.object({
 type Session = z.infer<typeof sessionType> & { id: string };
 type CreateSession = z.infer<typeof sessionType>;
 
-export async function getSession(firestore: Firestore, sessionId: string): Promise<null | Session> {
+async function getSessionFromDatabase(
+  firestore: Firestore,
+  sessionId: string
+): Promise<null | Session> {
   const sessionDoc = await firestore.collection('sessions').doc(sessionId).get();
   if (!sessionDoc.exists) {
     return null;
@@ -26,7 +29,7 @@ export async function getSession(firestore: Firestore, sessionId: string): Promi
   };
 }
 
-async function generateSessionId(authSignSecret: string): Promise<string> {
+function generateSessionId(authSignSecret: string): Promise<string> {
   const iteration = 500;
   const keylength = 24;
   const digest = 'sha1';
@@ -40,7 +43,7 @@ async function generateSessionId(authSignSecret: string): Promise<string> {
   );
 }
 
-export async function createSession(
+async function createSessionInDatabase(
   firestore: Firestore,
   userId: string,
   authSignSecret: string
@@ -57,7 +60,7 @@ export async function createSession(
   };
 }
 
-export async function readSessionIdFromCookies(cookies: Cookies, authSignSecret: string) {
+function readSessionIdFromCookies(cookies: Cookies, authSignSecret: string) {
   const encryptedSessionId = cookies.get('eventorg-session-id');
   if (!encryptedSessionId) {
     return null;
@@ -71,7 +74,7 @@ export async function readSessionIdFromCookies(cookies: Cookies, authSignSecret:
 
   return result.value;
 }
-export async function writeSessionToCookies(
+export function writeSessionToCookies(
   cookies: Cookies,
   sessionId: string,
   authSignSecret: string,
@@ -85,4 +88,44 @@ export async function writeSessionToCookies(
     secure: true,
     sameSite: 'strict'
   });
+}
+
+function deleteSessionFromCookies(cookies: Cookies) {
+  cookies.delete('eventorg-session-id', {
+    path: '/',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict'
+  });
+}
+
+export async function createSession(
+  firestore: Firestore,
+  cookies: Cookies,
+  userId: string,
+  authSignSecret: string,
+  domain?: string
+) {
+  const sessionData = await createSessionInDatabase(firestore, userId, authSignSecret);
+  writeSessionToCookies(cookies, sessionData.id, authSignSecret, domain);
+}
+
+export async function deleteSession(firestore: Firestore, cookies: Cookies, sessionId: string) {
+  await firestore.collection('sessions').doc(sessionId).delete();
+  deleteSessionFromCookies(cookies);
+}
+
+export async function getSession(firestore: Firestore, cookies: Cookies, authSignSecret: string) {
+  const sessionId = readSessionIdFromCookies(cookies, authSignSecret);
+  if (!sessionId) {
+    return null;
+  }
+
+  const session = await getSessionFromDatabase(firestore, sessionId);
+  if (!session) {
+    deleteSessionFromCookies(cookies);
+    return null;
+  }
+
+  return session;
 }
