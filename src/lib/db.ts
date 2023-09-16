@@ -1,5 +1,7 @@
 import { Firestore } from '@google-cloud/firestore';
 
-export function createFirestoreClient(): Firestore {
-  return new Firestore();
+export function createFirestoreClient(projectId: string): Firestore {
+  return new Firestore({
+    projectId
+  });
 }

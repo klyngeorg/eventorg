@@ -16,6 +16,15 @@ function setupEnv() {
     }),
     ORIGIN: str({
       default: 'http://localhost:3000'
+    }),
+    FIREBASE_API_KEY: str({
+      default: 'AIzaSyCRAYKK0rXOHYicqT1cCKrTD3aITSb5Xu4'
+    }),
+    FIREBASE_AUTH_DOMAIN: str({
+      default: 'klyngeorg-eventorg.firebaseapp.com'
+    }),
+    GOOGLE_PROJECT_ID: str({
+      default: 'klyngeorg-eventorg'
     })
   });
 }

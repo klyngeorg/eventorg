@@ -21,7 +21,16 @@ async function getSessionFromDatabase(
     return null;
   }
 
-  const session = sessionType.parse(sessionDoc.data());
+  const data = sessionDoc.data();
+
+  if (!data) {
+    return null;
+  }
+  
+  const session = sessionType.parse({
+    userId: data.userId,
+    expiresAt: data.expiresAt.toDate()
+  });
 
   return {
     id: sessionDoc.id,
@@ -46,12 +55,13 @@ function generateSessionId(authSignSecret: string): Promise<string> {
 async function createSessionInDatabase(
   firestore: Firestore,
   userId: string,
-  authSignSecret: string
+  authSignSecret: string,
+  expiresAt: Date
 ): Promise<Session> {
   const sessionId = await generateSessionId(authSignSecret);
   const session = {
     userId,
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+    expiresAt
   } satisfies CreateSession;
   await firestore.collection('sessions').doc(sessionId).set(session);
   return {
@@ -78,6 +88,7 @@ export function writeSessionToCookies(
   cookies: Cookies,
   sessionId: string,
   authSignSecret: string,
+  expiresAt: Date,
   domain?: string
 ) {
   const encryptedSessionId = sign(sessionId, authSignSecret);
@@ -86,7 +97,8 @@ export function writeSessionToCookies(
     path: '/',
     httpOnly: true,
     secure: true,
-    sameSite: 'strict'
+    sameSite: 'strict',
+    expires: expiresAt
   });
 }
 
@@ -95,7 +107,7 @@ function deleteSessionFromCookies(cookies: Cookies) {
     path: '/',
     httpOnly: true,
     secure: true,
-    sameSite: 'strict'
+    sameSite: 'strict',
   });
 }
 
@@ -106,8 +118,9 @@ export async function createSession(
   authSignSecret: string,
   domain?: string
 ) {
-  const sessionData = await createSessionInDatabase(firestore, userId, authSignSecret);
-  writeSessionToCookies(cookies, sessionData.id, authSignSecret, domain);
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days
+  const sessionData = await createSessionInDatabase(firestore, userId, authSignSecret, expiresAt);
+  writeSessionToCookies(cookies, sessionData.id, authSignSecret, expiresAt, domain);
 }
 
 export async function deleteSession(firestore: Firestore, cookies: Cookies, sessionId: string) {
