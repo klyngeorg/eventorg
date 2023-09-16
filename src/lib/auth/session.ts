@@ -26,7 +26,7 @@ async function getSessionFromDatabase(
   if (!data) {
     return null;
   }
-  
+
   const session = sessionType.parse({
     userId: data.userId,
     expiresAt: data.expiresAt.toDate()
@@ -107,7 +107,7 @@ function deleteSessionFromCookies(cookies: Cookies) {
     path: '/',
     httpOnly: true,
     secure: true,
-    sameSite: 'strict',
+    sameSite: 'strict'
   });
 }
 
