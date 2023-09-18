@@ -33,22 +33,19 @@ export async function GET({ url, cookies }) {
 
   // Do not store firebase auth
   firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
-  const result = await firebase.auth().signInWithEmailLink(emailForSignIn, url.toString()).catch(() => {
-    throw redirect(303, '/auth/login?error=code-expired');
-  });
+  const result = await firebase
+    .auth()
+    .signInWithEmailLink(emailForSignIn, url.toString())
+    .catch(() => {
+      throw redirect(303, '/auth/login?error=code-expired');
+    });
 
   if (!result.user) {
     throw redirect(303, '/auth/login?error=code-expired');
   }
 
   const userId = result.user.uid;
-  await createSession(
-    database,
-    cookies,
-    userId,
-    config.COOKIE_SIGNING_SECRET,
-    config.SELF_DOMAIN
-  );
+  await createSession(database, cookies, userId, config.COOKIE_SIGNING_SECRET, config.SELF_DOMAIN);
 
   throw redirect(303, '/');
 }
