@@ -49,5 +49,5 @@ export async function GET({ url, cookies }) {
   const userId = result.user.uid;
   await createSession(database, cookies, userId, config.COOKIE_SIGNING_SECRET, config.SELF_DOMAIN);
 
-  throw redirect(303, '/');
+  throw redirect(302, '/');
 }
