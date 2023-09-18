@@ -1,22 +1,32 @@
-FROM oven/bun:1.0.2 as deps
+FROM node:20-alpine3.16 as base
+
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+
+RUN corepack enable
 WORKDIR /app
 
-COPY package.json bun.lockb ./
+FROM base as deps
 
-RUN bun install
+COPY package.json pnpm-lock.yaml ./
 
-FROM oven/bun:1.0.2 as build
-WORKDIR /app
+RUN pnpm install --frozen-lockfile
 
-COPY --from=deps /app/node_modules ./node_modules
+FROM deps as builder
+
 COPY . .
 
-RUN bun install
-RUN bun run build
+RUN pnpm run build
 
-FROM oven/bun:1.0.2 as runner
-WORKDIR /app
+FROM base as runner
 
-COPY --from=build /app/build ./
+# Don't run production as root
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 service-user
+USER service-user
 
-CMD ["bun", "run", "/app/index.js"]
+ENV NODE_ENV production
+
+COPY --from=builder /app .
+
+CMD ["node", "build/index.js"]

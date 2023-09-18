@@ -25,7 +25,7 @@
         E-post
         <input name="email" type="email" />
       </label>
-      <button>Send innloggingslenke</button>
+      <button type="submit">Send innloggingslenke</button>
     </form>
   {/if}
 </div>

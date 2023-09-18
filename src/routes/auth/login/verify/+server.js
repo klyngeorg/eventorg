@@ -44,6 +44,8 @@ export async function GET({ url, cookies }) {
     throw redirect(303, '/auth/login?error=code-expired');
   }
 
+  cookies.delete('eventorg-email-for-sign-in');
+
   const userId = result.user.uid;
   await createSession(database, cookies, userId, config.COOKIE_SIGNING_SECRET, config.SELF_DOMAIN);
 

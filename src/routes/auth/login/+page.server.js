@@ -1,6 +1,4 @@
-import { $page } from '$app/stores';
 import { createConfig } from '$lib/config';
-import { createFirestoreClient } from '$lib/db';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
