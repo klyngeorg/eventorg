@@ -8,7 +8,7 @@ const config = createConfig();
 
 /** @type {import('./$types').Actions} */
 export const actions = {
-  login: async ({ request, url, cookies }) => {
+  default: async ({ request, url, cookies }) => {
     const data = await request.formData();
     const email = data.get('email');
 

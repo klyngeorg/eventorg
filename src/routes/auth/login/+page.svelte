@@ -20,7 +20,7 @@
      {#if error === 'code-expired'}
       <div class="alert">⚠️ En feil oppsto under innloggingen. Vennligst prøv igjen.</div>
     {/if}
-    <form method="POST" action="?/login">
+    <form method="POST">
       <label>
         E-post
         <input name="email" type="email" />
