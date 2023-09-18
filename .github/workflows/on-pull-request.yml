@@ -4,11 +4,9 @@ on: [pull_request]
 jobs:
   typical-workflow:
     name: Typical
-    uses: bjerkio/workflows/.github/workflows/pnpm-typical.yml@v2
+    uses: bjerkio/workflows/.github/workflows/bun-typical.yml@v2
 
     concurrency:
       group: pr-${{ github.ref }}
       cancel-in-progress: true
 
-    with:
-      use-engines: true
