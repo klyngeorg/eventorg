@@ -1,6 +1,7 @@
 Dockerfile
 .dockerignore
 .git
+.github
 .gitignore
 .gitattributes
 README.md
