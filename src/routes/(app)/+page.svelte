@@ -1,3 +1,3 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
-<p>Dette er en test</p>
+<h1>Din konto hos Klynge Næringsforening</h1>
+<p>Her vi snart kunne se ditt medlemskap, og invitere gjester til våre arrangementer.</p>
+<a href="/auth/logout">Logg ut</a>

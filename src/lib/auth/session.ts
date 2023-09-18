@@ -97,7 +97,7 @@ export function writeSessionToCookies(
     path: '/',
     httpOnly: true,
     secure: true,
-    sameSite: 'strict',
+    sameSite: 'lax',
     expires: expiresAt
   });
 }
@@ -123,7 +123,16 @@ export async function createSession(
   writeSessionToCookies(cookies, sessionData.id, authSignSecret, expiresAt, domain);
 }
 
-export async function deleteSession(firestore: Firestore, cookies: Cookies, sessionId: string) {
+export async function deleteSession(
+  firestore: Firestore,
+  cookies: Cookies,
+  authSignSecret: string
+) {
+  const sessionId = readSessionIdFromCookies(cookies, authSignSecret);
+  if (!sessionId) {
+    return null;
+  }
+
   await firestore.collection('sessions').doc(sessionId).delete();
   deleteSessionFromCookies(cookies);
 }

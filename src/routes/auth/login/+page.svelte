@@ -4,6 +4,7 @@
   export let form;
 
   const error = $page.url.searchParams.get('error');
+  const reason = $page.url.searchParams.get('reason');
 </script>
 
 <div class="container">
@@ -17,8 +18,11 @@
     {#if error === 'missing-email'}
       <div class="alert">⚠️ En feil oppsto under innloggingen. Vennligst prøv igjen.</div>
     {/if}
-     {#if error === 'code-expired'}
+    {#if error === 'code-expired'}
       <div class="alert">⚠️ En feil oppsto under innloggingen. Vennligst prøv igjen.</div>
+    {/if}
+    {#if reason === 'logout'}
+      <div class="alert">Du er logget ut!</div>
     {/if}
     <form method="POST">
       <label>
