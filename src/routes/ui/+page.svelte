@@ -1,9 +1,9 @@
 <script>
   import ListItem from '$components/list-item.svelte';
-  import List from '$components/list.svelte';
+  import ListBox from '$components/list-box.svelte';
 </script>
 
-<List ariaLabel="liste over arrangementer">
+<ListBox ariaLabel="liste over arrangementer">
   <ListItem>
     <strong>26. oktober 2023 →</strong>
     Nettverkslunsj på Vaaghals
@@ -20,4 +20,4 @@
     <strong>26. oktober 2023 →</strong>
     Nettverkslunsj på Vaaghals
   </ListItem>
-</List>
+</ListBox>
