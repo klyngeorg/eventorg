@@ -1,6 +1,7 @@
 import { createConfig } from '$lib/config';
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+import { createFirebaseAuth } from '$lib/firebase';
+import { FirebaseError } from 'firebase/app';
+import { AuthErrorCodes, sendSignInLinkToEmail } from 'firebase/auth';
 
 const config = createConfig();
 
@@ -17,13 +18,7 @@ export const actions = {
       };
     }
 
-    firebase.initializeApp({
-      apiKey: config.FIREBASE_API_KEY,
-      authDomain: config.FIREBASE_AUTH_DOMAIN
-    });
-
-    // Do not store firebase auth
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
+    const auth = createFirebaseAuth(config);
 
     const redirectUrl = new URL('/auth/login/verify', url);
 
@@ -33,11 +28,26 @@ export const actions = {
       maxAge: 20 * 60 // 20 minutes
     });
 
-    await firebase.auth().sendSignInLinkToEmail(email.toString(), {
-      url: redirectUrl.toString(),
-      handleCodeInApp: true
-    });
+    try {
+      await sendSignInLinkToEmail(auth, email.toString(), {
+        url: redirectUrl.toString(),
+        handleCodeInApp: true
+      });
 
-    return { success: true };
+      return { success: true };
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        if (error.code === AuthErrorCodes.ADMIN_ONLY_OPERATION) {
+          return {
+            success: false,
+            reason: 'forbidden'
+          };
+        }
+
+        return {
+          success: false
+        };
+      }
+    }
   }
 };

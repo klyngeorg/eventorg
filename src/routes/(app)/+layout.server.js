@@ -13,8 +13,6 @@ export async function load({ cookies }) {
     throw redirect(303, '/auth/login');
   }
 
-  console.log({ session }, 'Found a session');
-
   return {
     props: {
       session
