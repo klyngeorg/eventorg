@@ -41,7 +41,7 @@
     "firebase": "^10.5.0",
     "svelte-meta-tags": "^3.0.4",
     "ts-invariant": "^0.10.3",
-    "vite-imagetools": "^5.1.2",
+    "vite-imagetools": "^6.0.0",
     "zod": "^3.22.2"
   }
 }
